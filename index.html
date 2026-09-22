@@ -30,7 +30,6 @@
   a{color:inherit;}
   .wrap{max-width:860px; margin:0 auto; padding:0 24px;}
 
-  /* 상단 네임 블록 */
   .namebar{border-bottom:1px solid var(--line); background:var(--bg);}
   .namebar .wrap{padding-top:40px; padding-bottom:40px;}
   .namebar .name{font-size:24px; font-weight:800; letter-spacing:-0.02em; margin-bottom:10px;}
@@ -38,7 +37,6 @@
   .namebar .info a{text-decoration:none;}
   .namebar .info a:hover{color:var(--ink); text-decoration:underline;}
 
-  /* hero */
   header.hero{padding:72px 0 72px; border-bottom:1px solid var(--line);}
   .eyebrow{
     display:inline-block; font-size:12px; font-weight:600; letter-spacing:0.06em;
@@ -61,7 +59,6 @@
   .btn-ghost{background:transparent; color:var(--ink);}
   .btn-ghost:hover{background:var(--panel);}
 
-  /* section shell */
   section{padding:64px 0; border-bottom:1px solid var(--line);}
   section:last-of-type{border-bottom:none;}
   .section-head{margin-bottom:28px;}
@@ -69,7 +66,6 @@
   .section-title{font-size:24px; font-weight:800; letter-spacing:-0.02em; margin:0 0 8px;}
   .section-desc{font-size:14px; color:var(--ink-soft); max-width:460px;}
 
-  /* 공통 세로영상 카드 */
   .vcard{
     position:relative; border-radius:var(--radius); overflow:hidden;
     aspect-ratio:9/16; background:#111; border:1px solid var(--line);
@@ -88,17 +84,14 @@
   }
   .vcard:hover .overlay{opacity:1;}
 
-  /* 01 쇼츠 (3칸) */
   .shorts-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
   .shorts-grid .ph{color:#B9B9F2; background:linear-gradient(160deg,#1a1a2e,#25254a);}
 
-  /* 02 여행 릴스 (3x2) */
   .travel-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
   .travel-grid .ph{color:#cfe0e8; background:linear-gradient(160deg,#0e2a33,#164452);}
   .travel-caption{text-align:center; font-size:13px; color:var(--ink-soft); margin-top:20px;}
   .quality-note{text-align:center; font-size:11px; color:#A6A6A0; margin-top:10px;}
 
-  /* 소리 켜기/끄기 버튼 */
   .sound-btn{
     position:absolute; top:8px; right:8px; z-index:3;
     width:32px; height:32px; border-radius:50%;
@@ -116,7 +109,6 @@
     .sound-btn{width:26px; height:26px; font-size:11px; top:5px; right:5px;}
   }
 
-  /* process */
   .process-list{display:flex; flex-direction:column; gap:0;}
   .process-item{display:flex; gap:16px; padding:16px 0; border-top:1px solid var(--line);}
   .process-item:last-child{border-bottom:1px solid var(--line);}
@@ -124,7 +116,6 @@
   .process-body h3{font-size:15px; margin:0 0 4px; font-weight:700;}
   .process-body p{font-size:13px; color:var(--ink-soft); margin:0;}
 
-  /* tools & certs */
   .sub-label{font-size:12px; font-weight:700; color:var(--ink-soft); letter-spacing:0.04em; margin:0 0 12px;}
   .tag-row{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:28px;}
   .tag-row:last-child{margin-bottom:0;}
@@ -134,14 +125,12 @@
   }
   .tag-cert{background:var(--accent-soft); border-color:#D9D9F7; color:#2E30B8; font-weight:600;}
 
-  /* career */
   .career-list{display:flex; flex-direction:column; gap:14px;}
   .career-item{display:flex; justify-content:space-between; gap:12px; font-size:14px; border-top:1px solid var(--line); padding-top:14px;}
   .career-item:first-child{border-top:none; padding-top:0;}
   .career-role{font-weight:700;}
   .career-meta{color:var(--ink-soft); font-size:13px; text-align:right; white-space:nowrap;}
 
-  /* contact */
   .contact-box{background:var(--ink); color:#fff; border-radius:20px; padding:44px 32px; text-align:center;}
   .contact-box h2{font-size:22px; margin:0 0 10px; font-weight:800;}
   .contact-box p{color:#C9C9C6; font-size:14px; margin:0 0 24px;}
@@ -380,7 +369,6 @@
 
     v.muted = true;
 
-    // ── 소리 버튼 생성 (여행 릴스 카드에만) ──
     if(card.closest('.travel-grid') || card.closest('.shorts-grid')){
       var btn = document.createElement('button');
       btn.className = 'sound-btn';
@@ -394,7 +382,6 @@
         e.stopPropagation();
 
         if(v.muted){
-          // 다른 영상 소리는 모두 끄기 (동시 재생 방지)
           document.querySelectorAll('.vcard video').forEach(function(other){
             if(other !== v){
               other.muted = true;
@@ -416,18 +403,15 @@
       });
     }
 
-    // ── PC: 마우스 올리면 재생 ──
     card.addEventListener('mouseenter', function(){
       v.play().catch(function(){});
     });
     card.addEventListener('mouseleave', function(){
-      // 소리를 켜둔 영상은 계속 재생 (일부러 듣는 중이므로)
       if(!v.muted) return;
       v.pause();
       v.currentTime = 0;
     });
 
-    // ── 모바일: 화면에 보이면 재생 ──
     if(window.matchMedia('(hover: none)').matches){
       var io = new IntersectionObserver(function(entries){
         entries.forEach(function(e){
@@ -435,7 +419,6 @@
             v.play().catch(function(){});
           } else {
             v.pause();
-            // 화면에서 벗어나면 소리도 끄기
             if(!v.muted){
               v.muted = true;
               var b = card.querySelector('.sound-btn');
