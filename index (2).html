@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>모자은 — Shorts Editor</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css" />
+<style>
+  :root{
+    --bg:#F7F7F4;
+    --ink:#161615;
+    --ink-soft:#5C5C58;
+    --line:#DEDDD6;
+    --accent:#4A4CE8;
+    --accent-soft:#EEEEFC;
+    --panel:#FFFFFF;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+  .wrap{max-width:860px; margin:0 auto; padding:0 24px;}
+
+  /* 상단 네임 블록 */
+  .namebar{border-bottom:1px solid var(--line); background:var(--bg);}
+  .namebar .wrap{padding-top:40px; padding-bottom:40px;}
+  .namebar .name{font-size:24px; font-weight:800; letter-spacing:-0.02em; margin-bottom:10px;}
+  .namebar .info{font-size:13px; color:var(--ink-soft); display:flex; gap:18px; flex-wrap:wrap;}
+  .namebar .info a{text-decoration:none;}
+  .namebar .info a:hover{color:var(--ink); text-decoration:underline;}
+
+  /* hero */
+  header.hero{padding:72px 0 72px; border-bottom:1px solid var(--line);}
+  .eyebrow{
+    display:inline-block; font-size:12px; font-weight:600; letter-spacing:0.06em;
+    color:var(--accent); background:var(--accent-soft);
+    padding:5px 10px; border-radius:100px; margin-bottom:18px;
+  }
+  h1{
+    font-size:38px; font-weight:800; letter-spacing:-0.03em; margin:0;
+    line-height:1.25;
+  }
+  h1 span{color:var(--accent);}
+  .btn{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:11px 18px; border-radius:100px; font-size:14px; font-weight:600;
+    text-decoration:none; border:1px solid var(--line);
+    transition:transform .15s ease, background .15s ease;
+  }
+  .btn-primary{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .btn-primary:hover{transform:translateY(-1px);}
+  .btn-ghost{background:transparent; color:var(--ink);}
+  .btn-ghost:hover{background:var(--panel);}
+
+  /* section shell */
+  section{padding:64px 0; border-bottom:1px solid var(--line);}
+  section:last-of-type{border-bottom:none;}
+  .section-head{margin-bottom:28px;}
+  .section-num{font-size:12px; color:var(--ink-soft); font-weight:600; letter-spacing:0.08em; margin-bottom:8px;}
+  .section-title{font-size:24px; font-weight:800; letter-spacing:-0.02em; margin:0 0 8px;}
+  .section-desc{font-size:14px; color:var(--ink-soft); max-width:460px;}
+
+  /* 공통 세로영상 카드 */
+  .vcard{
+    position:relative; border-radius:var(--radius); overflow:hidden;
+    aspect-ratio:9/16; background:#111; border:1px solid var(--line);
+    display:block; text-decoration:none;
+  }
+  .vcard video{width:100%; height:100%; object-fit:cover; display:block;}
+  .vcard .ph{
+    width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+    font-size:13px; text-align:center; padding:14px; line-height:1.5;
+  }
+  .vcard .overlay{
+    position:absolute; inset:auto 0 0 0; padding:14px 12px;
+    background:linear-gradient(to top, rgba(0,0,0,.75), transparent);
+    color:#fff; font-size:12px; display:flex; align-items:center; justify-content:flex-start;
+    opacity:0; transition:opacity .2s ease; pointer-events:none;
+  }
+  .vcard:hover .overlay{opacity:1;}
+
+  /* 01 쇼츠 (3칸) */
+  .shorts-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  .shorts-grid .ph{color:#B9B9F2; background:linear-gradient(160deg,#1a1a2e,#25254a);}
+
+  /* 02 여행 릴스 (3x2) */
+  .travel-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  .travel-grid .ph{color:#cfe0e8; background:linear-gradient(160deg,#0e2a33,#164452);}
+  .travel-caption{text-align:center; font-size:13px; color:var(--ink-soft); margin-top:20px;}
+
+  /* 소리 켜기/끄기 버튼 */
+  .sound-btn{
+    position:absolute; top:8px; right:8px; z-index:3;
+    width:32px; height:32px; border-radius:50%;
+    border:none; cursor:pointer;
+    background:rgba(0,0,0,0.55); color:#fff;
+    font-size:14px; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+    backdrop-filter:blur(4px);
+    transition:background .15s ease, transform .15s ease;
+    padding:0;
+  }
+  .sound-btn:hover{background:rgba(0,0,0,0.8); transform:scale(1.08);}
+  .sound-btn.on{background:#fff; color:#111;}
+  @media(max-width:600px){
+    .sound-btn{width:26px; height:26px; font-size:11px; top:5px; right:5px;}
+  }
+
+  /* process */
+  .process-list{display:flex; flex-direction:column; gap:0;}
+  .process-item{display:flex; gap:16px; padding:16px 0; border-top:1px solid var(--line);}
+  .process-item:last-child{border-bottom:1px solid var(--line);}
+  .process-step{font-size:12px; font-weight:700; color:var(--accent); width:56px; flex-shrink:0; padding-top:2px;}
+  .process-body h3{font-size:15px; margin:0 0 4px; font-weight:700;}
+  .process-body p{font-size:13px; color:var(--ink-soft); margin:0;}
+
+  /* tools & certs */
+  .sub-label{font-size:12px; font-weight:700; color:var(--ink-soft); letter-spacing:0.04em; margin:0 0 12px;}
+  .tag-row{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:28px;}
+  .tag-row:last-child{margin-bottom:0;}
+  .tag{
+    font-size:13px; padding:8px 14px; border-radius:100px;
+    background:var(--panel); border:1px solid var(--line); color:var(--ink);
+  }
+  .tag-cert{background:var(--accent-soft); border-color:#D9D9F7; color:#2E30B8; font-weight:600;}
+
+  /* career */
+  .career-list{display:flex; flex-direction:column; gap:14px;}
+  .career-item{display:flex; justify-content:space-between; gap:12px; font-size:14px; border-top:1px solid var(--line); padding-top:14px;}
+  .career-item:first-child{border-top:none; padding-top:0;}
+  .career-role{font-weight:700;}
+  .career-meta{color:var(--ink-soft); font-size:13px; text-align:right; white-space:nowrap;}
+
+  /* contact */
+  .contact-box{background:var(--ink); color:#fff; border-radius:20px; padding:44px 32px; text-align:center;}
+  .contact-box h2{font-size:22px; margin:0 0 10px; font-weight:800;}
+  .contact-box p{color:#C9C9C6; font-size:14px; margin:0 0 24px;}
+  .contact-links{display:flex; justify-content:center; gap:10px; flex-wrap:wrap;}
+  .contact-box .btn-primary{background:#fff; color:var(--ink); border-color:#fff;}
+
+  footer{padding:28px 0; text-align:center; font-size:12px; color:var(--ink-soft);}
+
+  @media(max-width:600px){
+    h1{font-size:28px;}
+    .shorts-grid, .travel-grid{gap:8px;}
+    header.hero{padding:56px 0 48px;}
+    .career-item{flex-direction:column;}
+    .career-meta{text-align:left;}
+    .vcard .ph{font-size:11px; padding:8px;}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{transition:none !important; animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="namebar">
+  <div class="wrap">
+    <div class="name">모자은</div>
+    <div class="info">
+      <a href="tel:01038192547">📞 010-3819-2547</a>
+      <a href="mailto:jjaeuningg@naver.com">✉️ jjaeuningg@naver.com</a>
+    </div>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">SHORTS EDITOR</span>
+    <h1>짧은 영상 안에<br>흐름과 리듬을 <span>편집</span>합니다.</h1>
+  </div>
+</header>
+
+<section id="work">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">01 · WORK</div>
+      <h2 class="section-title">최근 작업한 쇼츠</h2>
+      <p class="section-desc">직접 작업한 쇼츠 영상이에요.</p>
+    </div>
+    <div class="shorts-grid">
+
+      <div class="vcard">
+        <div class="ph">영상 미리보기<br>자리 (01)</div>
+        <!-- 영상 준비되면 위 .ph 삭제 후 아래 주석 해제 -->
+        <!-- <video src="videos/short1.mp4" muted playsinline loop preload="metadata"></video> -->
+        <div class="overlay"><span>편집 01</span></div>
+      </div>
+
+      <div class="vcard">
+        <div class="ph">영상 미리보기<br>자리 (02)</div>
+        <!-- <video src="videos/short2.mp4" muted playsinline loop preload="metadata"></video> -->
+        <div class="overlay"><span>편집 02</span></div>
+      </div>
+
+      <div class="vcard">
+        <div class="ph">영상 미리보기<br>자리 (03)</div>
+        <!-- <video src="videos/short3.mp4" muted playsinline loop preload="metadata"></video> -->
+        <div class="overlay"><span>편집 03</span></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="travel">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">02 · PERSONAL PROJECT</div>
+      <h2 class="section-title">여행 릴스</h2>
+      <p class="section-desc">여행을 좋아해서 직접 촬영하고 편집한 개인 작업물이에요. 스크롤하면 자동으로 재생되고, 소리 버튼으로 사운드를 켤 수 있어요.</p>
+    </div>
+    <div class="travel-grid">
+
+      <div class="vcard">
+        <div class="ph">여행 영상<br>자리 (01)</div>
+        <!-- <video src="videos/travel1.mp4" muted playsinline loop preload="metadata"></video> -->
+      </div>
+
+      <div class="vcard">
+        <div class="ph">여행 영상<br>자리 (02)</div>
+        <!-- <video src="videos/travel2.mp4" muted playsinline loop preload="metadata"></video> -->
+      </div>
+
+      <div class="vcard">
+        <div class="ph">여행 영상<br>자리 (03)</div>
+        <!-- <video src="videos/travel3.mp4" muted playsinline loop preload="metadata"></video> -->
+      </div>
+
+      <div class="vcard">
+        <div class="ph">여행 영상<br>자리 (04)</div>
+        <!-- <video src="videos/travel4.mp4" muted playsinline loop preload="metadata"></video> -->
+      </div>
+
+      <div class="vcard">
+        <div class="ph">여행 영상<br>자리 (05)</div>
+        <!-- <video src="videos/travel5.mp4" muted playsinline loop preload="metadata"></video> -->
+      </div>
+
+      <div class="vcard">
+        <div class="ph">여행 영상<br>자리 (06)</div>
+        <!-- <video src="videos/travel6.mp4" muted playsinline loop preload="metadata"></video> -->
+      </div>
+
+    </div>
+    <p class="travel-caption">여행지에서 담은 순간들을 리듬감 있게 이어붙인 개인 작업물</p>
+  </div>
+</section>
+
+<section id="process">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">03 · PROCESS</div>
+      <h2 class="section-title">작업 방식</h2>
+      <p class="section-desc">한 편을 만들 때 거치는 과정입니다.</p>
+    </div>
+    <div class="process-list">
+      <div class="process-item">
+        <div class="process-step">01</div>
+        <div class="process-body">
+          <h3>기획</h3>
+          <p>주제와 훅(Hook) 포인트를 먼저 정하고 러프 컨셉을 잡습니다.</p>
+        </div>
+      </div>
+      <div class="process-item">
+        <div class="process-step">02</div>
+        <div class="process-body">
+          <h3>소스 정리</h3>
+          <p>촬영본 또는 제공받은 소스를 컷 단위로 분류합니다.</p>
+        </div>
+      </div>
+      <div class="process-item">
+        <div class="process-step">03</div>
+        <div class="process-body">
+          <h3>컷 편집</h3>
+          <p>템포를 만드는 데 집중해서 가편집본을 완성합니다.</p>
+        </div>
+      </div>
+      <div class="process-item">
+        <div class="process-step">04</div>
+        <div class="process-body">
+          <h3>자막 · 효과</h3>
+          <p>가독성 좋은 자막과 절제된 효과로 몰입도를 높입니다.</p>
+        </div>
+      </div>
+      <div class="process-item">
+        <div class="process-step">05</div>
+        <div class="process-body">
+          <h3>사운드 · 최종 마감</h3>
+          <p>BGM과 사운드 밸런스를 맞춘 뒤 최종 인코딩합니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tools">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">04 · TOOLS & CERTIFICATION</div>
+      <h2 class="section-title">사용 툴 &amp; 자격증</h2>
+    </div>
+
+    <p class="sub-label">사용 툴</p>
+    <div class="tag-row">
+      <span class="tag">캡컷 (CapCut)</span>
+      <span class="tag">포토샵</span>
+      <span class="tag">라이트룸</span>
+      <span class="tag">자막 스타일링</span>
+      <span class="tag">썸네일 제작</span>
+      <span class="tag">색보정</span>
+    </div>
+
+    <p class="sub-label">자격증</p>
+    <div class="tag-row">
+      <span class="tag tag-cert">포토샵 자격증</span>
+      <span class="tag tag-cert">헤어 자격증</span>
+      <span class="tag tag-cert">메이크업 자격증</span>
+    </div>
+  </div>
+</section>
+
+<section id="career">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">05 · CAREER</div>
+      <h2 class="section-title">이력</h2>
+    </div>
+    <div class="career-list">
+      <div class="career-item">
+        <div class="career-role">숨고 포토 리터칭 활동</div>
+        <div class="career-meta">Freelance</div>
+      </div>
+      <div class="career-item">
+        <div class="career-role">해온사진관</div>
+        <div class="career-meta">이천시</div>
+      </div>
+      <div class="career-item">
+        <div class="career-role">레코디드</div>
+        <div class="career-meta">강남</div>
+      </div>
+      <div class="career-item">
+        <div class="career-role">펄나인사진관</div>
+        <div class="career-meta">용산구</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap">
+    <div class="contact-box">
+      <h2>같이 작업해요</h2>
+      <p>재택으로 빠르고 꼼꼼하게 작업합니다. 연락 주세요.</p>
+      <div class="contact-links">
+        <a class="btn btn-primary" href="mailto:jjaeuningg@naver.com">jjaeuningg@naver.com</a>
+        <a class="btn btn-ghost" style="border-color:#3a3a38; color:#fff;" href="tel:01038192547">010-3819-2547</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">© 2026 모자은</div>
+</footer>
+
+<script>
+  document.querySelectorAll('.vcard').forEach(function(card){
+    var v = card.querySelector('video');
+    if(!v) return;
+
+    v.muted = true;
+
+    // ── 소리 버튼 생성 (여행 릴스 카드에만) ──
+    if(card.closest('.travel-grid')){
+      var btn = document.createElement('button');
+      btn.className = 'sound-btn';
+      btn.type = 'button';
+      btn.textContent = '🔇';
+      btn.setAttribute('aria-label', '소리 켜기');
+      card.appendChild(btn);
+
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+
+        if(v.muted){
+          // 다른 영상 소리는 모두 끄기 (동시 재생 방지)
+          document.querySelectorAll('.travel-grid video').forEach(function(other){
+            if(other !== v){
+              other.muted = true;
+              var ob = other.parentElement.querySelector('.sound-btn');
+              if(ob){ ob.textContent = '🔇'; ob.classList.remove('on'); ob.setAttribute('aria-label','소리 켜기'); }
+            }
+          });
+          v.muted = false;
+          btn.textContent = '🔊';
+          btn.classList.add('on');
+          btn.setAttribute('aria-label', '소리 끄기');
+          v.play().catch(function(){});
+        } else {
+          v.muted = true;
+          btn.textContent = '🔇';
+          btn.classList.remove('on');
+          btn.setAttribute('aria-label', '소리 켜기');
+        }
+      });
+    }
+
+    // ── PC: 마우스 올리면 재생 ──
+    card.addEventListener('mouseenter', function(){
+      v.play().catch(function(){});
+    });
+    card.addEventListener('mouseleave', function(){
+      // 소리를 켜둔 영상은 계속 재생 (일부러 듣는 중이므로)
+      if(!v.muted) return;
+      v.pause();
+      v.currentTime = 0;
+    });
+
+    // ── 모바일: 화면에 보이면 재생 ──
+    if(window.matchMedia('(hover: none)').matches){
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if(e.isIntersecting){
+            v.play().catch(function(){});
+          } else {
+            v.pause();
+            // 화면에서 벗어나면 소리도 끄기
+            if(!v.muted){
+              v.muted = true;
+              var b = card.querySelector('.sound-btn');
+              if(b){ b.textContent = '🔇'; b.classList.remove('on'); b.setAttribute('aria-label','소리 켜기'); }
+            }
+          }
+        });
+      }, {threshold:0.6});
+      io.observe(card);
+    }
+  });
+</script>
+
+</body>
+</html>
