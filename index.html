@@ -92,7 +92,7 @@
   .shorts-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
   .shorts-grid .ph{color:#B9B9F2; background:linear-gradient(160deg,#1a1a2e,#25254a);}
 
-  /* 02 여행 릴스 (3x2) */
+  /* 02 여행 릴스 (3개) */
   .travel-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
   .travel-grid .ph{color:#cfe0e8; background:linear-gradient(160deg,#0e2a33,#164452);}
   .travel-caption{text-align:center; font-size:13px; color:var(--ink-soft); margin-top:20px;}
@@ -278,21 +278,6 @@
         <!-- <video src="travel3.mp4" muted playsinline loop preload="metadata"></video> -->
       </div>
 
-      <div class="vcard">
-        <div class="ph">여행 영상<br>자리 (04)</div>
-        <!-- <video src="travel4.mp4" muted playsinline loop preload="metadata"></video> -->
-      </div>
-
-      <div class="vcard">
-        <div class="ph">여행 영상<br>자리 (05)</div>
-        <!-- <video src="travel5.mp4" muted playsinline loop preload="metadata"></video> -->
-      </div>
-
-      <div class="vcard">
-        <div class="ph">여행 영상<br>자리 (06)</div>
-        <!-- <video src="travel6.mp4" muted playsinline loop preload="metadata"></video> -->
-      </div>
-
     </div>
     <p class="travel-caption">여행지에서 담은 순간들을 리듬감 있게 이어붙인 개인 작업물</p>
     <p class="icon-legend"><span>🔊 소리 켜기</span><span>🔍 크게 보기</span></p>
@@ -428,11 +413,47 @@
   var lightboxVideo = lightbox.querySelector('.lightbox-video');
   var lightboxClose = lightbox.querySelector('.lightbox-close');
 
+  var lockedScrollY = 0;
+
+  function lockPageScroll(){
+    lockedScrollY = window.scrollY || window.pageYOffset || 0;
+    document.body.style.position = 'fixed';
+    document.body.style.top = '-' + lockedScrollY + 'px';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function unlockPageScroll(){
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
+    document.body.style.overflow = '';
+    window.scrollTo(0, lockedScrollY);
+  }
+
+  function muteAllCardVideos(){
+    document.querySelectorAll('.vcard video').forEach(function(other){
+      other.muted = true;
+      var ob = other.parentElement.querySelector('.sound-btn');
+      if(ob){
+        ob.textContent = '🔇';
+        ob.classList.remove('on');
+        ob.setAttribute('aria-label','소리 켜기');
+      }
+    });
+  }
+
   function closeLightbox(){
     lightbox.classList.remove('active');
     lightboxVideo.pause();
+    lightboxVideo.muted = true;
     lightboxVideo.removeAttribute('src');
     lightboxVideo.load();
+    unlockPageScroll();
   }
   lightboxClose.addEventListener('click', closeLightbox);
   lightbox.addEventListener('click', function(e){
@@ -469,10 +490,22 @@
       if(targetW > maxW){ targetW = maxW; }
 
       var targetH = targetW * (16/9);
+      // 크게 보기에서는 선택한 영상만 소리가 나도록 정리
+      muteAllCardVideos();
+      document.querySelectorAll('.vcard video').forEach(function(other){
+        if(other !== v) other.pause();
+      });
+      v.pause();
+
+      lightboxVideo.pause();
       lightboxVideo.style.width = targetW + 'px';
       lightboxVideo.style.height = targetH + 'px';
       lightboxVideo.src = v.currentSrc || v.src;
-      lightboxVideo.muted = v.muted;
+      lightboxVideo.currentTime = v.currentTime || 0;
+      lightboxVideo.muted = false;
+      lightboxVideo.volume = 1;
+
+      lockPageScroll();
       lightbox.classList.add('active');
       lightboxVideo.play().catch(function(){});
     });
@@ -492,13 +525,7 @@
 
         if(v.muted){
           // 다른 영상 소리는 모두 끄기 (동시 재생 방지)
-          document.querySelectorAll('.vcard video').forEach(function(other){
-            if(other !== v){
-              other.muted = true;
-              var ob = other.parentElement.querySelector('.sound-btn');
-              if(ob){ ob.textContent = '🔇'; ob.classList.remove('on'); ob.setAttribute('aria-label','소리 켜기'); }
-            }
-          });
+          muteAllCardVideos();
           v.muted = false;
           btn.textContent = '🔊';
           btn.classList.add('on');
